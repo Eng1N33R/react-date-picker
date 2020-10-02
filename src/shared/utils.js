@@ -1,21 +1,28 @@
-export {
-  between,
-} from 'react-calendar/dist/shared/utils';
+/**
+ * Returns a value no smaller than min and no larger than max.
+ *
+ * @param {*} value Value to return.
+ * @param {*} min Minimum return value.
+ * @param {*} max Maximum return value.
+ */
+export function between(value, min, max) {
+  if (min && min > value) {
+    return min;
+  }
+  if (max && max < value) {
+    return max;
+  }
+  return value;
+}
 
-const isValidNumber = a => typeof a === 'number' && !isNaN(a);
-export const min = (...args) => Math.min(...args.filter(isValidNumber));
-export const max = (...args) => Math.max(...args.filter(isValidNumber));
+function isValidNumber(num) {
+  return num !== null && num !== false && !Number.isNaN(Number(num));
+}
 
-export const updateInputWidth = (element) => {
-  const span = document.createElement('span');
-  span.innerHTML = element.value || element.placeholder;
+export function safeMin(...args) {
+  return Math.min(...args.filter(isValidNumber));
+}
 
-  const container = element.parentElement;
-
-  container.appendChild(span);
-
-  const width = span.getBoundingClientRect().width + 4;
-  element.style.width = `${width}px`;
-
-  container.removeChild(span);
-};
+export function safeMax(...args) {
+  return Math.max(...args.filter(isValidNumber));
+}

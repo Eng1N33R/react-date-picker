@@ -1,20 +1,22 @@
 {
   "name": "react-date-picker",
-  "version": "6.11.3",
+  "version": "8.0.3",
   "description": "A date picker for your React app.",
   "main": "dist/entry.js",
+  "source": "src/entry.js",
   "types": "./index.d.ts",
-  "es6": "src/entry.js",
   "scripts": {
-    "build": "yarn run build-js && yarn run copy-styles && yarn run build-styles",
-    "build-js": "babel src -d dist --ignore __tests__",
+    "build": "yarn build-js && yarn copy-styles && yarn build-styles && yarn copy-types",
+    "build-js": "babel src -d dist --ignore \"**/*.spec.js,**/*.spec.jsx\"",
     "build-styles": "lessc ./dist/DatePicker.less ./dist/DatePicker.css",
+    "clean": "rimraf dist",
     "copy-styles": "node ./copy-styles.js",
-    "prepublishOnly": "yarn run build",
-    "test": "yarn run test-eslint && yarn run test-jest",
-    "test-eslint": "eslint --ext .jsx,.js src/",
-    "test-jest": "jest",
-    "test-jest-coverage": "jest --coverage"
+    "copy-types": "node ./copy-types.js",
+    "jest": "jest",
+    "jest-coverage": "jest --coverage",
+    "lint": "eslint sample/ src/ test/ --ext .jsx,.js",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test": "yarn lint && yarn jest"
   },
   "jest": {
     "setupFiles": [
@@ -24,6 +26,9 @@
       "**/src/**.{js,jsx}",
       "!**/src/entry.js",
       "!**/src/entry.nostyle.js"
+    ],
+    "testPathIgnorePatterns": [
+      "utils.js"
     ]
   },
   "keywords": [
@@ -58,46 +63,50 @@
       "email": "kevin.kipp@gmail.com"
     },
     {
+      "name": "Linus Marco"
+    },
+    {
       "name": "Marco Fugaro",
       "email": "marco.fugaro@gmail.com"
     }
   ],
   "license": "MIT",
   "dependencies": {
-    "detect-element-overflow": "^1.1.1",
-    "lodash.once": "^4.1.1",
+    "@types/react-calendar": "^3.0.0",
+    "@wojtekmaj/date-utils": "^1.0.3",
+    "get-user-locale": "^1.2.0",
+    "make-event-props": "^1.1.0",
     "merge-class-names": "^1.1.1",
     "prop-types": "^15.6.0",
-    "react-calendar": "^2.16.1",
-    "react-lifecycles-compat": "^3.0.4"
+    "react-calendar": "^3.0.0",
+    "react-fit": "^1.0.3",
+    "update-input-width": "^1.1.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^8.2.6",
-    "babel-jest": "^23.4.0",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb": "^17.0.0",
-    "eslint-plugin-import": "^2.13.0",
-    "eslint-plugin-jsx-a11y": "^6.1.1",
-    "eslint-plugin-react": "^7.9.1",
-    "jest": "^23.4.1",
-    "jest-cli": "^23.4.1",
-    "less": "^3.7.1",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1",
-    "react-test-renderer": "^16.4.1"
+    "@babel/cli": "^7.8.0",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-react": "^7.9.0",
+    "babel-eslint": "^10.0.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "eslint": "~7.2.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-jsx-a11y": "^6.3.0",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
+    "jest": "^26.0.0",
+    "less": "^3.8.1",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-test-renderer": "^16.7.0",
+    "rimraf": "^3.0.0"
   },
   "peerDependencies": {
-    "react": ">=15.5",
-    "react-dom": ">=15.5"
+    "react": ">=16.3",
+    "react-dom": ">=16.3"
   },
   "files": [
     "LICENSE",
@@ -109,5 +118,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/wojtekmaj/react-date-picker.git"
-  }
+  },
+  "funding": "https://github.com/wojtekmaj/react-date-picker?sponsor=1"
 }

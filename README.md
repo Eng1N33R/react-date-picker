@@ -1,6 +1,4 @@
-![downloads](https://img.shields.io/npm/dt/react-date-picker.svg) ![build](https://img.shields.io/travis/wojtekmaj/react-date-picker/master.svg) ![dependencies](https://img.shields.io/david/wojtekmaj/react-date-picker.svg
-) ![dev dependencies](https://img.shields.io/david/dev/wojtekmaj/react-date-picker.svg
-) [![tested with jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
+[![npm](https://img.shields.io/npm/v/react-date-picker.svg)](https://www.npmjs.com/package/react-date-picker) ![downloads](https://img.shields.io/npm/dt/react-date-picker.svg) [![build](https://travis-ci.com/wojtekmaj/react-date-picker.svg?branch=master)](https://travis-ci.com/wojtekmaj/react-date-picker) ![dependencies](https://img.shields.io/david/wojtekmaj/react-date-picker.svg) ![dev dependencies](https://img.shields.io/david/dev/wojtekmaj/react-date-picker.svg) [![tested with jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
 
 # React-Date-Picker
 
@@ -10,14 +8,6 @@ A date picker for your React app.
 * Supports virtually any language
 * No moment.js needed
 
-## Important message for React-Date-Picker ≤5 users
-
-Sadly, the authors of original React-Date-Picker ≤5 have abandoned the package. Because it lacked compatibility with React 16, the package would quickly become dead.
-
-In version 6 I aim to provide a solution that will suit everyone's needs. To make that happen, I need time and your help. Please don't hesitate to file an issues with bugs, suggestions, or simply telling me more about how *you* use react-date-picker. Your help will be invaluable!
-
-[Upgrade guide for React-Date-Picker ≤5 users](https://github.com/wojtekmaj/react-date-picker/wiki/Upgrade-guide-for-React-Date-Picker-≤5-users) is there to help you with the upgrade.
-
 ## tl;dr
 * Install by executing `npm install react-date-picker` or `yarn add react-date-picker`.
 * Import by adding `import DatePicker from 'react-date-picker'`.
@@ -25,7 +15,7 @@ In version 6 I aim to provide a solution that will suit everyone's needs. To mak
 
 ## Demo
 
-Minimal demo page is included in sample directory.
+A minimal demo page can be found in `sample` directory.
 
 [Online demo](http://projects.wojtekmaj.pl/react-date-picker/) is also available!
 
@@ -37,9 +27,9 @@ React-Date-Picker will play nicely with [React-Time-Picker](https://github.com/w
 
 ### Compatibility
 
-Your project needs to use React 16 or later. If you use older version of React, please refer to the table below to find suitable React-Date-Picker version.
+Your project needs to use React 16 or later. If you use an older version of React, please refer to the table below to find a suitable React-Date-Picker version.
 
-|React version|Newest supported React-Date-Picker|
+|React version|Newest available React-Date-Picker|
 |----|----|
 |>16.0|latest|
 |>15.5|6.7.0|
@@ -59,26 +49,20 @@ Add React-Date-Picker to your project by executing `npm install react-date-picke
 Here's an example of basic usage:
 
 ```js
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import DatePicker from 'react-date-picker';
 
-class MyApp extends Component {
-  state = {
-    date: new Date(),
-  }
+function MyApp() {
+  const [value, onChange] = useState(new Date());
 
-  onChange = date => this.setState({ date })
-
-  render() {
-    return (
-      <div>
-        <DatePicker
-          onChange={this.onChange}
-          value={this.state.date}
-        />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <DatePicker
+        onChange={onChange}
+        value={value}
+      />
+    </div>
+  );
 }
 ```
 
@@ -94,25 +78,40 @@ Displays an input field complete with custom inputs, native input, and a calenda
 
 #### Props
 
-|Prop name|Description|Example values|
-|----|----|----|
-|calendarClassName|Defines class name(s) that will be added along with "react-calendar" to the main React-Calendar `<div>` element.|<ul><li>String: `"class1 class2"`</li><li>Array of strings: `["class1", "class2 class3"]`</li></ul>|
-|calendarIcon|Defines the content of the calendar button.|<ul><li>String: `"Calendar"`</li><li>React element: `<CalendarIcon />`</li></ul>|
-|className|Defines class name(s) that will be added along with "react-date-picker" to the main React-Date-Picker `<div>` element.|<ul><li>String: `"class1 class2"`</li><li>Array of strings: `["class1", "class2 class3"]`</li></ul>|
-|clearIcon|Defines the content of the clear button.|<ul><li>String: `"Clear"`</li><li>React element: `<ClearIcon />`</li></ul>|
-|disabled|Defines whether the date picker should be disabled. Defaults to false.|`true`|
-|isOpen|Defines whether the calendar should be opened. Defaults to false.|`true`|
-|locale|Defines which locale should be used by the date picker and the calendar. Can be any [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag). Defaults to user's browser settings.|`"hu-HU"`|
-|maxDate|Defines maximum date that the user can select. Periods partially overlapped by maxDate will also be selectable, although React-Date-Picker will ensure that no later date is selected.|Date: `new Date()`|
-|maxDetail|Defines the most detailed calendar view that the user shall see. View defined here also becomes the one on which clicking an item in the calendar will select a date and pass it to onChange. Can be "month", "year", "decade" or "century". Defaults to "month".|`"month"`|
-|minDate|Defines minimum date that the user can select. Periods partially overlapped by minDate will also be selectable, although React-Date-Picker will ensure that no earlier date is selected.|Date: `new Date()`|
-|minDetail|Defines the least detailed calendar view that the user shall see. Can be "month", "year", "decade" or "century". Defaults to "century".|`"century"`|
-|name|Defines input name. Defaults to "date".|`"myCustomName"`|
-|onChange|Function called when the user clicks an item on the most detailed view available.|`(value) => alert('New date is: ', value)`|
-|returnValue|Defines which dates shall be passed by the calendar to the onChange function and onClick{Period} functions. Can be "start", "end" or "range". The latter will cause an array with start and end values to be passed. Defaults to "start".|`"range"`|
-|required|Defines whether date input should be required. Defaults to false.|`true`|
-|showLeadingZeros|Defines whether leading zeros should be rendered in date inputs. Defaults to false.|`true`|
-|value|Defines the value of the input.|<ul><li>Date: `new Date()`</li><li>An array of dates: `[new Date(2017, 0, 1), new Date(2017, 7, 1)]`</li></ul>|
+|Prop name|Description|Default value|Example values|
+|----|----|----|----|
+|autoFocus|Automatically focuses the input on mount.|n/a|`true`|
+|calendarAriaLabel|`aria-label` for the calendar button.|n/a|`"Toggle calendar"`|
+|calendarClassName|Class name(s) that will be added along with `"react-calendar"` to the main React-Calendar `<div>` element.|n/a|<ul><li>String: `"class1 class2"`</li><li>Array of strings: `["class1", "class2 class3"]`</li></ul>|
+|calendarIcon|Content of the calendar button. Setting the value explicitly to `null` will hide the icon.|(default icon)|<ul><li>String: `"Calendar"`</li><li>React element: `<CalendarIcon />`</li></ul>|
+|className|Class name(s) that will be added along with `"react-date-picker"` to the main React-Date-Picker `<div>` element.|n/a|<ul><li>String: `"class1 class2"`</li><li>Array of strings: `["class1", "class2 class3"]`</li></ul>|
+|clearAriaLabel|`aria-label` for the clear button.|n/a|`"Clear value"`|
+|clearIcon|Content of the clear button. Setting the value explicitly to `null` will hide the icon.|(default icon)|<ul><li>String: `"Clear"`</li><li>React element: `<ClearIcon />`</li></ul>|
+|closeCalendar|Whether to close the calendar on value selection.|`true`|`false`|
+|dayAriaLabel|`aria-label` for the day input.|n/a|`"Day"`|
+|dayPlaceholder|`placeholder` for the day input.|`"--"`|`"dd"`|
+|disabled|Whether the date picker should be disabled.|`false`|`true`|
+|disableCalendar|When set to `true`, will remove the calendar and the button toggling its visibility.|`false`|`true`|
+|format|Input format based on [Unicode Technical Standard #35](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table). Supported values are: `y`, `M`, `MM`, `MMM`, `MMMM`, `d`, `dd`.|n/a|`"y-MM-dd"`|
+|isOpen|Whether the calendar should be opened.|`false`|`true`|
+|locale|Locale that should be used by the date picker and the calendar. Can be any [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag).|User's browser settings|`"hu-HU"`|
+|maxDate|Maximum date that the user can select. Periods partially overlapped by maxDate will also be selectable, although React-Date-Picker will ensure that no later date is selected.|n/a|Date: `new Date()`|
+|maxDetail|The most detailed calendar view that the user shall see. View defined here also becomes the one on which clicking an item in the calendar will select a date and pass it to onChange. Can be `"month"`, `"year"`, `"decade"` or `"century"`.|`"month"`|`"year"`|
+|minDate|Minimum date that the user can select. Periods partially overlapped by minDate will also be selectable, although React-Date-Picker will ensure that no earlier date is selected.|n/a|Date: `new Date()`|
+|minDetail|The least detailed calendar view that the user shall see. Can be `"month"`, `"year"`, `"decade"` or `"century"`.|`"century"`|`"decade"`|
+|monthAriaLabel|`aria-label` for the month input.|n/a|`"Month"`|
+|monthPlaceholder|`placeholder` for the month input.|`"--"`|`"mm"`|
+|name|Input name.|`"date"`|`"myCustomName"`|
+|nativeInputAriaLabel|`aria-label` for the native date input.|n/a|`"Date"`|
+|onCalendarClose|Function called when the calendar closes.|n/a|`() => alert('Calendar closed')`|
+|onCalendarOpen|Function called when the calendar opens.|n/a|`() => alert('Calendar opened')`|
+|onChange|Function called when the user clicks an item on the most detailed view available.|n/a|`(value) => alert('New date is: ', value)`|
+|required|Whether date input should be required.|`false`|`true`|
+|returnValue|Which dates shall be passed by the calendar to the onChange function and onClick{Period} functions. Can be `"start"`, `"end"` or `"range"`. The latter will cause an array with start and end values to be passed.|`"start"`|`"range"`|
+|showLeadingZeros|Whether leading zeros should be rendered in date inputs.|`false`|`true`|
+|value|Input value.|n/a|<ul><li>Date: `new Date()`</li><li>An array of dates: `[new Date(2017, 0, 1), new Date(2017, 7, 1)]`</li></ul>|
+|yearAriaLabel|`aria-label` for the year input.|n/a|`"Year"`|
+|yearPlaceholder|`aria-label` for the year input.|`"----"`|`"yyyy"`|
 
 ### Calendar
 
@@ -150,3 +149,9 @@ Thank you to all our sponsors! [Become a sponsor](https://opencollective.com/rea
 Thank you to all our backers! [Become a backer](https://opencollective.com/react-date-picker#backer) and get your image on our README on GitHub.
 
 <a href="https://opencollective.com/react-date-picker#backers" target="_blank"><img src="https://opencollective.com/react-date-picker/backers.svg?width=890"></a>
+
+### Top Contributors
+
+Thank you to all our contributors that helped on this project!
+
+![Top Contributors](https://opencollective.com/react-date-picker/contributors.svg?width=890&button=false)

@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import DatePicker from 'react-date-picker/src/entry.nostyle';
 import 'react-date-picker/src/DatePicker.less';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import 'react-calendar/src/Calendar.less';
+import 'react-calendar/dist/Calendar.css';
 
 import ValidityOptions from './ValidityOptions';
 import MaxDetailOptions from './MaxDetailOptions';
@@ -15,8 +15,26 @@ import './Test.less';
 
 const now = new Date();
 
+const ariaLabelProps = {
+  calendarAriaLabel: 'Toggle calendar',
+  clearAriaLabel: 'Clear value',
+  dayAriaLabel: 'Day',
+  monthAriaLabel: 'Month',
+  nativeInputAriaLabel: 'Date',
+  yearAriaLabel: 'Year',
+};
+
+const placeholderProps = {
+  dayPlaceholder: 'dd',
+  monthPlaceholder: 'mm',
+  yearPlaceholder: 'yyyy',
+};
+
+/* eslint-disable no-console */
+
 export default class Test extends PureComponent {
   state = {
+    disabled: false,
     locale: null,
     maxDate: new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 15, 12),
     maxDetail: 'month',
@@ -34,6 +52,7 @@ export default class Test extends PureComponent {
 
   render() {
     const {
+      disabled,
       locale,
       maxDate,
       maxDetail,
@@ -52,7 +71,9 @@ export default class Test extends PureComponent {
     return (
       <div className="Test">
         <header>
-          <h1>react-date-picker test page</h1>
+          <h1>
+            react-date-picker test page
+          </h1>
         </header>
         <div className="Test__container">
           <aside className="Test__container__options">
@@ -73,14 +94,15 @@ export default class Test extends PureComponent {
               setState={setState}
             />
             <LocaleOptions
-              setState={setState}
               locale={locale}
+              setState={setState}
             />
             <ValueOptions
               setState={setState}
               value={value}
             />
             <ViewOptions
+              disabled={disabled}
               setState={setState}
               showLeadingZeros={showLeadingZeros}
               showNeighboringMonth={showNeighboringMonth}
@@ -91,25 +113,28 @@ export default class Test extends PureComponent {
             <form
               onSubmit={(event) => {
                 event.preventDefault();
-                /* eslint-disable no-console */
-                console.error('Calendar triggered submitting the form.');
+
+                console.warn('Calendar triggered submitting the form.');
                 console.log(event);
-                /* eslint-enable no-console */
               }}
             >
               <DatePicker
-                className="myCustomDatePickerClassName"
+                {...ariaLabelProps}
+                {...placeholderProps}
                 calendarClassName="myCustomCalendarClassName"
-                disabled={false}
+                className="myCustomDatePickerClassName"
+                disabled={disabled}
                 locale={locale}
                 maxDate={maxDate}
                 maxDetail={maxDetail}
                 minDate={minDate}
                 minDetail={minDetail}
                 name="myCustomName"
+                onCalendarClose={() => console.log('Calendar closed')}
+                onCalendarOpen={() => console.log('Calendar opened')}
                 onChange={this.onChange}
-                returnValue={returnValue}
                 required={required}
+                returnValue={returnValue}
                 showLeadingZeros={showLeadingZeros}
                 showNeighboringMonth={showNeighboringMonth}
                 showWeekNumbers={showWeekNumbers}
@@ -117,7 +142,12 @@ export default class Test extends PureComponent {
               />
               <br />
               <br />
-              <button id="submit">Submit</button>
+              <button
+                id="submit"
+                type="submit"
+              >
+                Submit
+              </button>
             </form>
           </main>
         </div>

@@ -5,13 +5,19 @@ declare module "react-date-picker" {
 
   export interface DatePickerProps extends CalendarProps {
     calendarClassName?: string | string[];
-    calendarIcon?: JSX.Element;
+    calendarIcon?: JSX.Element | null;
     className?: string | string[];
-    clearIcon?: JSX.Element;
+    clearIcon?: JSX.Element | null;
+    dayPlaceholder?: string;
     disabled?: boolean;
+    format?: string;
     isOpen?: boolean;
+    monthPlaceholder?: string;
     name?: string;
+    onCalendarOpen?: () => void;
+    onCalendarClose?: () => void;
     required?: boolean;
     showLeadingZeros?: boolean;
+    yearPlaceholder?: string;
   }
 }

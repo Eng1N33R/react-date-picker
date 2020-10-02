@@ -1,74 +1,45 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 const allViews = ['century', 'decade', 'year', 'month'];
 
-export default class MaxDetailOptions extends PureComponent {
-  onChange = (event) => {
+function upperCaseFirstLetter(str) {
+  return str.slice(0, 1).toUpperCase() + str.slice(1);
+}
+
+export default function MaxDetailOptions({ maxDetail, minDetail, setState }) {
+  function onChange(event) {
     const { value } = event.target;
 
-    this.props.setState({ maxDetail: value });
+    setState({ maxDetail: value });
   }
 
-  render() {
-    const { maxDetail, minDetail } = this.props;
-    const minDetailIndex = allViews.indexOf(minDetail);
+  const minDetailIndex = allViews.indexOf(minDetail);
 
-    return (
-      <fieldset id="detailoptions">
-        <legend htmlFor="viewoptions">Maximum detail</legend>
+  return (
+    <fieldset id="maxdetailoptions">
+      <legend htmlFor="maxdetailoptions">
+        Maximum detail
+      </legend>
 
-        <div>
+      {allViews.map((view, index) => (
+        <div key={view}>
           <input
-            checked={maxDetail === 'century'}
-            disabled={minDetailIndex > 0}
-            id="maxDetailCentury"
+            checked={maxDetail === view}
+            disabled={minDetailIndex > index}
+            id={`max-${view}`}
             name="maxDetail"
-            onChange={this.onChange}
+            onChange={onChange}
             type="radio"
-            value="century"
+            value={view}
           />
-          <label htmlFor="maxDetailCentury">Century</label>
+          <label htmlFor={`max-${view}`}>
+            {upperCaseFirstLetter(view)}
+          </label>
         </div>
-        <div>
-          <input
-            checked={maxDetail === 'decade'}
-            disabled={minDetailIndex > 1}
-            id="maxDetailDecade"
-            name="maxDetail"
-            onChange={this.onChange}
-            type="radio"
-            value="decade"
-          />
-          <label htmlFor="maxDetailDecade">Decade</label>
-        </div>
-        <div>
-          <input
-            checked={maxDetail === 'year'}
-            disabled={minDetailIndex > 2}
-            id="maxDetailYear"
-            name="maxDetail"
-            onChange={this.onChange}
-            type="radio"
-            value="year"
-          />
-          <label htmlFor="maxDetailYear">Year</label>
-        </div>
-        <div>
-          <input
-            checked={maxDetail === 'month'}
-            disabled={minDetailIndex > 3}
-            id="maxDetailMonth"
-            name="maxDetail"
-            onChange={this.onChange}
-            type="radio"
-            value="month"
-          />
-          <label htmlFor="maxDetailMonth">Month</label>
-        </div>
-      </fieldset>
-    );
-  }
+      ))}
+    </fieldset>
+  );
 }
 
 MaxDetailOptions.propTypes = {

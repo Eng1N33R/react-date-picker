@@ -1,67 +1,96 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
-export default class ViewOptions extends PureComponent {
-  onShowLeadingZerosChange = (event) => {
+export default function ViewOptions({
+  disabled,
+  setState,
+  showLeadingZeros,
+  showNeighboringMonth,
+  showWeekNumbers,
+}) {
+  function onDisabledChange(event) {
     const { checked } = event.target;
 
-    this.props.setState({ showLeadingZeros: checked });
+    setState({ disabled: checked });
   }
 
-  onShowWeekNumbersChange = (event) => {
+  function onShowLeadingZerosChange(event) {
     const { checked } = event.target;
 
-    this.props.setState({ showWeekNumbers: checked });
+    setState({ showLeadingZeros: checked });
   }
 
-  onshowNeighboringMonthChange = (event) => {
+  function onShowWeekNumbersChange(event) {
     const { checked } = event.target;
 
-    this.props.setState({ showNeighboringMonth: checked });
+    setState({ showWeekNumbers: checked });
   }
 
-  render() {
-    const { showLeadingZeros, showWeekNumbers, showNeighboringMonth } = this.props;
+  function onShowNeighboringMonthChange(event) {
+    const { checked } = event.target;
 
-    return (
-      <fieldset id="viewoptions">
-        <legend htmlFor="viewoptions">View options</legend>
-
-        <div>
-          <input
-            id="showLeadingZeros"
-            type="checkbox"
-            checked={showLeadingZeros}
-            onChange={this.onShowLeadingZerosChange}
-          />
-          <label htmlFor="showLeadingZeros">Show leading zeros</label>
-        </div>
-
-        <div>
-          <input
-            id="showWeekNumbers"
-            type="checkbox"
-            checked={showWeekNumbers}
-            onChange={this.onShowWeekNumbersChange}
-          />
-          <label htmlFor="showWeekNumbers">Show week numbers</label>
-        </div>
-
-        <div>
-          <input
-            id="showNeighboringMonth"
-            type="checkbox"
-            checked={showNeighboringMonth}
-            onChange={this.onshowNeighboringMonthChange}
-          />
-          <label htmlFor="showNeighboringMonth">{'Show neighboring month\'s days'}</label>
-        </div>
-      </fieldset>
-    );
+    setState({ showNeighboringMonth: checked });
   }
+
+  return (
+    <fieldset id="viewoptions">
+      <legend htmlFor="viewoptions">
+        View options
+      </legend>
+
+      <div>
+        <input
+          checked={disabled}
+          id="disabled"
+          onChange={onDisabledChange}
+          type="checkbox"
+        />
+        <label htmlFor="disabled">
+          Disabled
+        </label>
+      </div>
+
+      <div>
+        <input
+          checked={showLeadingZeros}
+          id="showLeadingZeros"
+          onChange={onShowLeadingZerosChange}
+          type="checkbox"
+        />
+        <label htmlFor="showLeadingZeros">
+          Show leading zeros
+        </label>
+      </div>
+
+      <div>
+        <input
+          checked={showWeekNumbers}
+          id="showWeekNumbers"
+          onChange={onShowWeekNumbersChange}
+          type="checkbox"
+        />
+        <label htmlFor="showWeekNumbers">
+          Show week numbers
+        </label>
+      </div>
+
+      <div>
+        <input
+          checked={showNeighboringMonth}
+          id="showNeighboringMonth"
+          onChange={onShowNeighboringMonthChange}
+          type="checkbox"
+        />
+        <label htmlFor="showNeighboringMonth">
+          {'Show neighboring month\'s days'}
+        </label>
+      </div>
+    </fieldset>
+  );
 }
 
 ViewOptions.propTypes = {
+  disabled: PropTypes.bool.isRequired,
   setState: PropTypes.func.isRequired,
   showLeadingZeros: PropTypes.bool.isRequired,
   showNeighboringMonth: PropTypes.bool.isRequired,

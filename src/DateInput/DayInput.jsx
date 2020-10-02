@@ -1,85 +1,51 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import mergeClassNames from 'merge-class-names';
-
 import {
-  getDay,
-  getDaysInMonth,
-  getMonth,
   getYear,
-} from '../shared/dates';
+  getMonthHuman,
+  getDate,
+  getDaysInMonth,
+} from '@wojtekmaj/date-utils';
+
+import Input from './Input';
+
 import { isMaxDate, isMinDate } from '../shared/propTypes';
-import { min, max, updateInputWidth } from '../shared/utils';
+import { safeMin, safeMax } from '../shared/utils';
 
-export default class DayInput extends PureComponent {
-  get currentMonthMaxDays() {
-    const { year, month } = this.props;
-
+export default function DayInput({
+  maxDate,
+  minDate,
+  month,
+  year,
+  ...otherProps
+}) {
+  const currentMonthMaxDays = (() => {
     if (!month) {
       return 31;
     }
 
     return getDaysInMonth(new Date(year, month - 1, 1));
+  })();
+
+  function isSameMonth(date) {
+    return date && year === getYear(date) && month === getMonthHuman(date);
   }
 
-  get maxDay() {
-    const { maxDate, month, year } = this.props;
-    return min(
-      this.currentMonthMaxDays,
-      maxDate && year === getYear(maxDate) && month === getMonth(maxDate) && getDay(maxDate),
-    );
-  }
+  const maxDay = safeMin(currentMonthMaxDays, isSameMonth(maxDate) && getDate(maxDate));
+  const minDay = safeMax(1, isSameMonth(minDate) && getDate(minDate));
 
-  get minDay() {
-    const { minDate, month, year } = this.props;
-    return max(
-      1, minDate && year === getYear(minDate) && month === getMonth(minDate) && getDay(minDate),
-    );
-  }
-
-  render() {
-    const { maxDay, minDay } = this;
-    const {
-      className, disabled, itemRef, value, onChange, onKeyDown, required, showLeadingZeros,
-    } = this.props;
-
-    const name = 'day';
-    const hasLeadingZero = showLeadingZeros && value !== null && value < 10;
-
-    return [
-      (hasLeadingZero ? '0' : null),
-      <input
-        key="day"
-        className={mergeClassNames(
-          `${className}__input`,
-          `${className}__day`,
-          hasLeadingZero && `${className}__input--hasLeadingZero`,
-        )}
-        disabled={disabled}
-        name={name}
-        max={maxDay}
-        min={minDay}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        placeholder="--"
-        ref={(ref) => {
-          if (ref) {
-            updateInputWidth(ref);
-          }
-
-          if (itemRef) {
-            itemRef(ref, name);
-          }
-        }}
-        required={required}
-        type="number"
-        value={value !== null ? value : ''}
-      />,
-    ];
-  }
+  return (
+    <Input
+      max={maxDay}
+      min={minDay}
+      name="day"
+      {...otherProps}
+    />
+  );
 }
 
 DayInput.propTypes = {
+  ariaLabel: PropTypes.string,
   className: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   itemRef: PropTypes.func,
@@ -88,6 +54,8 @@ DayInput.propTypes = {
   month: PropTypes.number,
   onChange: PropTypes.func,
   onKeyDown: PropTypes.func,
+  onKeyUp: PropTypes.func,
+  placeholder: PropTypes.string,
   required: PropTypes.bool,
   showLeadingZeros: PropTypes.bool,
   value: PropTypes.number,

@@ -1,41 +1,54 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import { getISOLocalDate } from '@wojtekmaj/date-utils';
 
-import { getISOLocalDate } from '../src/shared/dates';
+export default function ValueOptions({
+  setState,
+  value,
+}) {
+  const date = [].concat(value)[0];
 
-export default class ValueOptions extends PureComponent {
-  get date() {
-    const { value } = this.props;
-    return [].concat(value)[0];
+  function setValue(nextValue) {
+    setState({ value: nextValue });
   }
 
-  setValue = value => this.props.setState({ value });
-
-  onChange = (event) => {
-    const { value } = event.target;
-
-    this.setValue(value ? new Date(value) : value);
+  function onChange(event) {
+    const { value: nextValue } = event.target;
+    setValue(nextValue && new Date(nextValue));
   }
 
-  render() {
-    return (
-      <fieldset id="valueOptions">
-        <legend htmlFor="valueOptions">Set date externally</legend>
+  return (
+    <fieldset id="valueOptions">
+      <legend htmlFor="valueOptions">
+        Set date externally
+      </legend>
 
-        <div>
-          <label htmlFor="date">Date</label>
-          <input
-            id="date"
-            onChange={this.onChange}
-            type="date"
-            value={this.date ? getISOLocalDate(this.date) : ''}
-          />&nbsp;
-          <button onClick={() => this.setValue(null)}>Clear to null</button>
-          <button onClick={() => this.setValue('')}>Clear to empty string</button>
-        </div>
-      </fieldset>
-    );
-  }
+      <div>
+        <label htmlFor="date">
+          Date
+        </label>
+        <input
+          id="date"
+          onChange={onChange}
+          type="date"
+          value={date ? getISOLocalDate(date) : ''}
+        />
+        &nbsp;
+        <button
+          onClick={() => setValue(null)}
+          type="button"
+        >
+          Clear to null
+        </button>
+        <button
+          onClick={() => setValue('')}
+          type="button"
+        >
+          Clear to empty string
+        </button>
+      </div>
+    </fieldset>
+  );
 }
 
 ValueOptions.propTypes = {
@@ -43,6 +56,9 @@ ValueOptions.propTypes = {
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.instanceOf(Date),
-    PropTypes.arrayOf(PropTypes.instanceOf(Date)),
+    PropTypes.arrayOf(PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.instanceOf(Date),
+    ])),
   ]),
 };

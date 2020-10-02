@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import YearInput from '../YearInput';
+import YearInput from './YearInput';
 
 /* eslint-disable comma-dangle */
 
@@ -21,6 +21,36 @@ describe('YearInput', () => {
     expect(input).toHaveLength(1);
   });
 
+  it('applies given aria-label properly', () => {
+    const yearAriaLabel = 'Year';
+
+    const component = mount(
+      <YearInput
+        {...defaultProps}
+        ariaLabel={yearAriaLabel}
+      />
+    );
+
+    const input = component.find('input');
+
+    expect(input.prop('aria-label')).toBe(yearAriaLabel);
+  });
+
+  it('applies given placeholder properly', () => {
+    const yearPlaceholder = 'Year';
+
+    const component = mount(
+      <YearInput
+        {...defaultProps}
+        placeholder={yearPlaceholder}
+      />
+    );
+
+    const input = component.find('input');
+
+    expect(input.prop('placeholder')).toBe(yearPlaceholder);
+  });
+
   it('has proper name defined', () => {
     const component = mount(
       <YearInput {...defaultProps} />
@@ -29,6 +59,22 @@ describe('YearInput', () => {
     const input = component.find('input');
 
     expect(input.prop('name')).toBe('year');
+  });
+
+  it('has proper className defined', () => {
+    const className = 'react-date-picker';
+
+    const component = mount(
+      <YearInput
+        {...defaultProps}
+        className={className}
+      />
+    );
+
+    const input = component.find('input');
+
+    expect(input.hasClass('react-date-picker__input')).toBe(true);
+    expect(input.hasClass('react-date-picker__year')).toBe(true);
   });
 
   it('displays given value properly', () => {
@@ -106,14 +152,14 @@ describe('YearInput', () => {
     expect(itemRef).toHaveBeenCalledWith(expect.any(HTMLInputElement), 'year');
   });
 
-  it('has min = 1000 by default', () => {
+  it('has min = 1 by default', () => {
     const component = mount(
       <YearInput {...defaultProps} />
     );
 
     const input = component.find('input');
 
-    expect(input.prop('min')).toBe(1000);
+    expect(input.prop('min')).toBe(1);
   });
 
   it('has min = (year in minDate) given minDate', () => {

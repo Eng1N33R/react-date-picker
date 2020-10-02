@@ -1,33 +1,29 @@
-import { getDefaultLocale } from './locales';
+import getUserLocale from 'get-user-locale';
 
-const formatterCache = {};
+export function getFormatter(options) {
+  return (locale, date) => date.toLocaleString(locale || getUserLocale(), options);
+}
 
 /**
- * Gets Intl-based date formatter from formatter cache. If it doesn't exist in cache
- * just yet, it will be created on the fly.
+ * Changes the hour in a Date to ensure right date formatting even if DST is messed up.
+ * Workaround for bug in WebKit and Firefox with historical dates.
+ * For more details, see:
+ * https://bugs.chromium.org/p/chromium/issues/detail?id=750465
+ * https://bugzilla.mozilla.org/show_bug.cgi?id=1385643
+ *
+ * @param {Date} date Date.
  */
-const getFormatter = (options, locale) => {
-  if (!locale) {
-    // Default parameter is not enough as it does not protect us from null values
-    // eslint-disable-next-line no-param-reassign
-    locale = getDefaultLocale();
-  }
+function toSafeHour(date) {
+  const safeDate = new Date(date);
+  return new Date(safeDate.setHours(12));
+}
 
-  const stringifiedOptions = JSON.stringify(options);
+function getSafeFormatter(options) {
+  return (locale, date) => getFormatter(options)(locale, toSafeHour(date));
+}
 
-  if (!formatterCache[locale]) {
-    formatterCache[locale] = {};
-  }
+const formatMonthOptions = { month: 'long' };
+const formatShortMonthOptions = { month: 'short' };
 
-  if (!formatterCache[locale][stringifiedOptions]) {
-    formatterCache[locale][stringifiedOptions] = new Intl.DateTimeFormat(locale, options).format;
-  }
-
-  return formatterCache[locale][stringifiedOptions];
-};
-
-// eslint-disable-next-line import/prefer-default-export
-export const formatDate = (date, locale) => getFormatter(
-  { day: 'numeric', month: 'numeric', year: 'numeric' },
-  locale,
-)(date);
+export const formatMonth = getSafeFormatter(formatMonthOptions);
+export const formatShortMonth = getSafeFormatter(formatShortMonthOptions);

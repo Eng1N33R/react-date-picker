@@ -1,73 +1,44 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import mergeClassNames from 'merge-class-names';
+import { getYear } from '@wojtekmaj/date-utils';
 
-import {
-  getYear,
-} from '../shared/dates';
+import Input from './Input';
+
 import { isMaxDate, isMinDate, isValueType } from '../shared/propTypes';
-import { max, min, updateInputWidth } from '../shared/utils';
+import { safeMax, safeMin } from '../shared/utils';
 
-export default class YearInput extends PureComponent {
-  get maxYear() {
-    const { maxDate } = this.props;
-    return min(275760, maxDate && getYear(maxDate));
-  }
+export default function YearInput({
+  maxDate,
+  minDate,
+  placeholder = '----',
+  valueType,
+  ...otherProps
+}) {
+  const maxYear = safeMin(275760, maxDate && getYear(maxDate));
+  const minYear = safeMax(1, minDate && getYear(minDate));
 
-  get minYear() {
-    const { minDate } = this.props;
-    return max(1000, minDate && getYear(minDate));
-  }
-
-  get yearStep() {
-    const { valueType } = this.props;
-
+  const yearStep = (() => {
     if (valueType === 'century') {
       return 10;
     }
+
     return 1;
-  }
+  })();
 
-  render() {
-    const { maxYear, minYear, yearStep } = this;
-    const {
-      className, disabled, itemRef, value, onChange, onKeyDown, required,
-    } = this.props;
-
-    const name = 'year';
-
-    return (
-      <input
-        className={mergeClassNames(
-          `${className}__input`,
-          `${className}__year`,
-        )}
-        disabled={disabled}
-        name={name}
-        max={maxYear}
-        min={minYear}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        placeholder="--"
-        ref={(ref) => {
-          if (ref) {
-            updateInputWidth(ref);
-          }
-
-          if (itemRef) {
-            itemRef(ref, name);
-          }
-        }}
-        required={required}
-        step={yearStep}
-        type="number"
-        value={value !== null ? value : ''}
-      />
-    );
-  }
+  return (
+    <Input
+      max={maxYear}
+      min={minYear}
+      name="year"
+      placeholder={placeholder}
+      step={yearStep}
+      {...otherProps}
+    />
+  );
 }
 
 YearInput.propTypes = {
+  ariaLabel: PropTypes.string,
   className: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   itemRef: PropTypes.func,
@@ -75,6 +46,8 @@ YearInput.propTypes = {
   minDate: isMinDate,
   onChange: PropTypes.func,
   onKeyDown: PropTypes.func,
+  onKeyUp: PropTypes.func,
+  placeholder: PropTypes.string,
   required: PropTypes.bool,
   value: PropTypes.number,
   valueType: isValueType,

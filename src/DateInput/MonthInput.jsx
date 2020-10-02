@@ -1,68 +1,37 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import mergeClassNames from 'merge-class-names';
+import { getYear, getMonthHuman } from '@wojtekmaj/date-utils';
 
-import {
-  getMonth,
-  getYear,
-} from '../shared/dates';
+import Input from './Input';
+
 import { isMaxDate, isMinDate } from '../shared/propTypes';
-import { min, max, updateInputWidth } from '../shared/utils';
+import { safeMin, safeMax } from '../shared/utils';
 
-export default class MonthInput extends PureComponent {
-  get maxMonth() {
-    const { maxDate, year } = this.props;
-    return min(12, maxDate && year === getYear(maxDate) && getMonth(maxDate));
+export default function MonthInput({
+  maxDate,
+  minDate,
+  year,
+  ...otherProps
+}) {
+  function isSameYear(date) {
+    return date && year === getYear(date);
   }
 
-  get minMonth() {
-    const { minDate, year } = this.props;
-    return max(1, minDate && year === getYear(minDate) && getMonth(minDate));
-  }
+  const maxMonth = safeMin(12, isSameYear(maxDate) && getMonthHuman(maxDate));
+  const minMonth = safeMax(1, isSameYear(minDate) && getMonthHuman(minDate));
 
-  render() {
-    const { maxMonth, minMonth } = this;
-    const {
-      className, disabled, itemRef, value, onChange, onKeyDown, required, showLeadingZeros,
-    } = this.props;
-
-    const name = 'month';
-    const hasLeadingZero = showLeadingZeros && value !== null && value < 10;
-
-    return [
-      (hasLeadingZero ? '0' : null),
-      <input
-        key="month"
-        className={mergeClassNames(
-          `${className}__input`,
-          `${className}__month`,
-          hasLeadingZero && `${className}__input--hasLeadingZero`,
-        )}
-        disabled={disabled}
-        name={name}
-        max={maxMonth}
-        min={minMonth}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        placeholder="--"
-        ref={(ref) => {
-          if (ref) {
-            updateInputWidth(ref);
-          }
-
-          if (itemRef) {
-            itemRef(ref, name);
-          }
-        }}
-        type="number"
-        required={required}
-        value={value !== null ? value : ''}
-      />,
-    ];
-  }
+  return (
+    <Input
+      max={maxMonth}
+      min={minMonth}
+      name="month"
+      {...otherProps}
+    />
+  );
 }
 
 MonthInput.propTypes = {
+  ariaLabel: PropTypes.string,
   className: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   itemRef: PropTypes.func,
@@ -70,6 +39,8 @@ MonthInput.propTypes = {
   minDate: isMinDate,
   onChange: PropTypes.func,
   onKeyDown: PropTypes.func,
+  onKeyUp: PropTypes.func,
+  placeholder: PropTypes.string,
   required: PropTypes.bool,
   showLeadingZeros: PropTypes.bool,
   value: PropTypes.number,

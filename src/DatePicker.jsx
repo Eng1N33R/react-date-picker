@@ -1,12 +1,17 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { polyfill } from 'react-lifecycles-compat';
+import makeEventProps from 'make-event-props';
 import mergeClassNames from 'merge-class-names';
-import detectElementOverflow from 'detect-element-overflow';
-
-import Calendar from 'react-calendar/dist/entry.nostyle';
+import Calendar from 'react-calendar';
+import Fit from 'react-fit';
 
 import DateInput from './DateInput';
+
+import { isMaxDate, isMinDate } from './shared/propTypes';
+
+const baseClassName = 'react-date-picker';
+const outsideActionEvents = ['mousedown', 'focusin', 'touchstart'];
+const allViews = ['century', 'decade', 'year', 'month'];
 
 export default class DatePicker extends PureComponent {
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -23,44 +28,53 @@ export default class DatePicker extends PureComponent {
   state = {};
 
   componentDidMount() {
-    document.addEventListener('mousedown', this.onClick);
+    this.handleOutsideActionListeners();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { isOpen } = this.state;
+    const { onCalendarClose, onCalendarOpen } = this.props;
+
+    if (isOpen !== prevState.isOpen) {
+      this.handleOutsideActionListeners();
+      const callback = isOpen ? onCalendarOpen : onCalendarClose;
+      if (callback) callback();
+    }
   }
 
   componentWillUnmount() {
-    document.removeEventListener('mousedown', this.onClick);
+    this.handleOutsideActionListeners(false);
   }
 
-  onClick = (event) => {
+  get eventProps() {
+    return makeEventProps(this.props);
+  }
+
+  onOutsideAction = (event) => {
     if (this.wrapper && !this.wrapper.contains(event.target)) {
       this.closeCalendar();
     }
   }
 
-  openCalendar = () => {
-    this.setState({ isOpen: true });
-  }
-
-  closeCalendar = () => {
-    this.setState({ isOpen: false });
-  }
-
-  toggleCalendar = () => {
-    this.setState(prevState => ({ isOpen: !prevState.isOpen }));
-  }
-
-  onChange = (value, closeCalendar = true) => {
-    this.setState({
-      isOpen: !closeCalendar,
-    });
-
+  // eslint-disable-next-line react/destructuring-assignment
+  onChange = (value, closeCalendar = this.props.closeCalendar) => {
     const { onChange } = this.props;
+
+    if (closeCalendar) {
+      this.closeCalendar();
+    }
+
     if (onChange) {
       onChange(value);
     }
   }
 
-  onFocus = () => {
-    const { disabled } = this.props;
+  onFocus = (event) => {
+    const { disabled, onFocus } = this.props;
+
+    if (onFocus) {
+      onFocus(event);
+    }
 
     // Internet Explorer still fires onFocus on disabled elements
     if (disabled) {
@@ -70,48 +84,105 @@ export default class DatePicker extends PureComponent {
     this.openCalendar();
   }
 
+  openCalendar = () => {
+    this.setState({ isOpen: true });
+  }
+
+  closeCalendar = () => {
+    this.setState((prevState) => {
+      if (!prevState.isOpen) {
+        return null;
+      }
+
+      return { isOpen: false };
+    });
+  }
+
+  toggleCalendar = () => {
+    this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  }
+
   stopPropagation = event => event.stopPropagation();
 
   clear = () => this.onChange(null);
 
+  handleOutsideActionListeners(shouldListen) {
+    const { isOpen } = this.state;
+
+    const shouldListenWithFallback = typeof shouldListen !== 'undefined' ? shouldListen : isOpen;
+    const fnName = shouldListenWithFallback ? 'addEventListener' : 'removeEventListener';
+    outsideActionEvents.forEach(eventName => document[fnName](eventName, this.onOutsideAction));
+  }
+
   renderInputs() {
     const {
+      autoFocus,
+      calendarAriaLabel,
       calendarIcon,
+      clearAriaLabel,
       clearIcon,
+      dayAriaLabel,
+      dayPlaceholder,
+      disableCalendar,
       disabled,
+      format,
       locale,
       maxDate,
       maxDetail,
       minDate,
+      monthAriaLabel,
+      monthPlaceholder,
       name,
-      returnValue,
+      nativeInputAriaLabel,
       required,
+      returnValue,
       showLeadingZeros,
       value,
+      yearAriaLabel,
+      yearPlaceholder,
     } = this.props;
     const { isOpen } = this.state;
 
     const [valueFrom] = [].concat(value);
 
+    const ariaLabelProps = {
+      dayAriaLabel,
+      monthAriaLabel,
+      nativeInputAriaLabel,
+      yearAriaLabel,
+    };
+
+    const placeholderProps = {
+      dayPlaceholder,
+      monthPlaceholder,
+      yearPlaceholder,
+    };
+
     return (
-      <div className="react-date-picker__button">
+      <div className={`${baseClassName}__wrapper`}>
         <DateInput
+          {...ariaLabelProps}
+          {...placeholderProps}
+          autoFocus={autoFocus}
+          className={`${baseClassName}__inputGroup`}
           disabled={disabled}
-          locale={locale}
+          format={format}
           isCalendarOpen={isOpen}
+          locale={locale}
           maxDate={maxDate}
           maxDetail={maxDetail}
           minDate={minDate}
           name={name}
           onChange={this.onChange}
-          returnValue={returnValue}
           required={required}
+          returnValue={returnValue}
           showLeadingZeros={showLeadingZeros}
           value={valueFrom}
         />
         {clearIcon !== null && (
           <button
-            className="react-date-picker__clear-button react-date-picker__button__icon"
+            aria-label={clearAriaLabel}
+            className={`${baseClassName}__clear-button ${baseClassName}__button`}
             disabled={disabled}
             onClick={this.clear}
             onFocus={this.stopPropagation}
@@ -120,13 +191,14 @@ export default class DatePicker extends PureComponent {
             {clearIcon}
           </button>
         )}
-        {calendarIcon !== null && (
+        {calendarIcon !== null && !disableCalendar && (
           <button
-            className="react-date-picker__calendar-button react-date-picker__button__icon"
+            aria-label={calendarAriaLabel}
+            className={`${baseClassName}__calendar-button ${baseClassName}__button`}
             disabled={disabled}
+            onBlur={this.resetValue}
             onClick={this.toggleCalendar}
             onFocus={this.stopPropagation}
-            onBlur={this.resetValue}
             type="button"
           >
             {calendarIcon}
@@ -137,9 +209,10 @@ export default class DatePicker extends PureComponent {
   }
 
   renderCalendar() {
+    const { disableCalendar } = this.props;
     const { isOpen } = this.state;
 
-    if (isOpen === null) {
+    if (isOpen === null || disableCalendar) {
       return null;
     }
 
@@ -151,50 +224,25 @@ export default class DatePicker extends PureComponent {
       ...calendarProps
     } = this.props;
 
-    const className = 'react-date-picker__calendar';
+    const className = `${baseClassName}__calendar`;
 
     return (
-      <div
-        className={mergeClassNames(
-          className,
-          `${className}--${isOpen ? 'open' : 'closed'}`,
-        )}
-        ref={(ref) => {
-          if (!ref || !isOpen) {
-            return;
-          }
-
-          ref.classList.remove(`${className}--above-label`);
-
-          const collisions = detectElementOverflow(ref, document.body);
-
-          if (collisions.collidedBottom) {
-            const overflowTopAfterChange = (
-              collisions.overflowTop + ref.clientHeight + this.wrapper.clientHeight
-            );
-
-            // If it's going to make situation any better, display the calendar above the input
-            if (overflowTopAfterChange < collisions.overflowBottom) {
-              ref.classList.add(`${className}--above-label`);
-            }
-          }
-        }}
-      >
-        <Calendar
-          className={calendarClassName}
-          onChange={this.onChange}
-          value={value || null}
-          {...calendarProps}
-        />
-      </div>
+      <Fit>
+        <div className={mergeClassNames(className, `${className}--${isOpen ? 'open' : 'closed'}`)}>
+          <Calendar
+            className={calendarClassName}
+            onChange={this.onChange}
+            value={value || null}
+            {...calendarProps}
+          />
+        </div>
+      </Fit>
     );
   }
 
   render() {
     const { className, disabled } = this.props;
     const { isOpen } = this.state;
-
-    const baseClassName = 'react-date-picker';
 
     return (
       <div
@@ -204,6 +252,7 @@ export default class DatePicker extends PureComponent {
           `${baseClassName}--${disabled ? 'disabled' : 'enabled'}`,
           className,
         )}
+        {...this.eventProps}
         onFocus={this.onFocus}
         ref={(ref) => {
           if (!ref) {
@@ -220,34 +269,52 @@ export default class DatePicker extends PureComponent {
   }
 }
 
+const iconProps = {
+  xmlns: 'http://www.w3.org/2000/svg',
+  width: 19,
+  height: 19,
+  viewBox: '0 0 19 19',
+  stroke: 'black',
+  strokeWidth: 2,
+};
+
 const CalendarIcon = (
-  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 19 19">
-    <g stroke="black" strokeWidth="2">
-      <rect width="15" height="15" x="2" y="2" fill="none" />
-      <line x1="6" y1="0" x2="6" y2="4" />
-      <line x1="13" y1="0" x2="13" y2="4" />
-    </g>
+  <svg
+    {...iconProps}
+    className={`${baseClassName}__calendar-button__icon ${baseClassName}__button__icon`}
+  >
+    <rect fill="none" height="15" width="15" x="2" y="2" />
+    <line x1="6" x2="6" y1="0" y2="4" />
+    <line x1="13" x2="13" y1="0" y2="4" />
   </svg>
 );
 
 const ClearIcon = (
-  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 19 19">
-    <g stroke="black" strokeWidth="2">
-      <line x1="4" y1="4" x2="15" y2="15" />
-      <line x1="15" y1="4" x2="4" y2="15" />
-    </g>
+  <svg
+    {...iconProps}
+    className={`${baseClassName}__clear-button__icon ${baseClassName}__button__icon`}
+  >
+    <line x1="4" x2="15" y1="4" y2="15" />
+    <line x1="15" x2="4" y1="4" y2="15" />
   </svg>
 );
 
 DatePicker.defaultProps = {
   calendarIcon: CalendarIcon,
   clearIcon: ClearIcon,
+  closeCalendar: true,
   isOpen: null,
   returnValue: 'start',
 };
 
+const isValue = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.instanceOf(Date),
+]);
+
 DatePicker.propTypes = {
-  ...Calendar.propTypes,
+  autoFocus: PropTypes.bool,
+  calendarAriaLabel: PropTypes.string,
   calendarClassName: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.arrayOf(PropTypes.string),
@@ -257,13 +324,34 @@ DatePicker.propTypes = {
     PropTypes.string,
     PropTypes.arrayOf(PropTypes.string),
   ]),
+  clearAriaLabel: PropTypes.string,
   clearIcon: PropTypes.node,
+  closeCalendar: PropTypes.bool,
+  dayAriaLabel: PropTypes.string,
+  dayPlaceholder: PropTypes.string,
+  disableCalendar: PropTypes.bool,
   disabled: PropTypes.bool,
+  format: PropTypes.string,
   isOpen: PropTypes.bool,
+  locale: PropTypes.string,
+  maxDate: isMaxDate,
+  maxDetail: PropTypes.oneOf(allViews),
+  minDate: isMinDate,
+  monthAriaLabel: PropTypes.string,
+  monthPlaceholder: PropTypes.string,
   name: PropTypes.string,
-  returnValue: PropTypes.oneOf(['start', 'end', 'range']),
+  nativeInputAriaLabel: PropTypes.string,
+  onCalendarClose: PropTypes.func,
+  onCalendarOpen: PropTypes.func,
+  onChange: PropTypes.func,
+  onFocus: PropTypes.func,
   required: PropTypes.bool,
+  returnValue: PropTypes.oneOf(['start', 'end', 'range']),
   showLeadingZeros: PropTypes.bool,
+  value: PropTypes.oneOfType([
+    isValue,
+    PropTypes.arrayOf(isValue),
+  ]),
+  yearAriaLabel: PropTypes.string,
+  yearPlaceholder: PropTypes.string,
 };
-
-polyfill(DatePicker);
